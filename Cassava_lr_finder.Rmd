@@ -20,6 +20,10 @@ the fly.
 Most of the code came from the [notebook of this previous competition](https://www.kaggle.com/cdk292/simple-resnet50-lr-finder-and-cyclic-lr-with-r) 
 on Leaf Pathology.
 
+## Important note 
+
+The appearence of the curve of the learning rate finder depend heavily on the size of the batch size.
+
 ## Model construction
 
 ```{r}
@@ -153,7 +157,7 @@ train_generator <- flow_images_from_dataframe(dataframe = train_labels,
                                               x_col = "image_id",
                                               y_col = c("CBB","CBSD", "CGM", "CMD", "Healthy"),
                                               target_size = c(448, 448),
-                                              batch_size=4)
+                                              batch_size=16)
 
 validation_generator <- flow_images_from_dataframe(dataframe = val_labels, 
                                               directory = image_path,
@@ -283,17 +287,18 @@ head(data)
 ```
 
 ```{r}
-ggplot(data, aes(x=Learning_rate, y=Loss)) + scale_x_log10() + geom_point() +  geom_smooth(span = 0.5)
+x_breaks = 10^pretty(log10(data$Learning_rate))
+ggplot(data, aes(x=Learning_rate, y=Loss)) + scale_x_log10(breaks=x_breaks) + geom_point() +  geom_smooth(span = 0.5)
 ```
 
 I add several smooth setting since I don't know in advance how the curves and dots
 will looks like :
 
 ```{r}
-ggplot(data, aes(x=Learning_rate, y=Loss)) + scale_x_log10() + geom_point() +  geom_smooth(span = 0.3)
+ggplot(data, aes(x=Learning_rate, y=Loss)) + scale_x_log10(breaks=x_breaks) + geom_point() +  geom_smooth(span = 0.3)
 ```
 
 
 ```{r}
-ggplot(data, aes(x=Learning_rate, y=Loss)) + scale_x_log10() + geom_point() +  geom_smooth(span = 0.8)
+ggplot(data, aes(x=Learning_rate, y=Loss)) + scale_x_log10(breaks=x_breaks) + geom_point() +  geom_smooth(span = 0.8)
 ```
