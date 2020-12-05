@@ -1,6 +1,6 @@
 ---
 title: "Learning rate finder"
-output: html_document
+output: github_document
 ---
 
 # Learning rate finder for the efficientnet with R

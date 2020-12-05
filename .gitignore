@@ -1,2 +1,5 @@
 cassava-leaf-disease-classification/*
-
+.RData
+.Rhistory
+checkpoints/*
+*.hdf5
