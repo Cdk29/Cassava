@@ -408,7 +408,7 @@ Cyclic_LR <- function(iteration=1:32000, base_lr=1e-5, max_lr=1e-3, step_size=20
 
 ``` r
 n=200
-nb_epochs=10
+nb_epochs=20
 #n_iter<-n*nb_epochs
 ```
 
