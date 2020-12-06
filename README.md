@@ -2,6 +2,9 @@
 
 
 Repository for the [Cassava Leaf Disease Classification Competition on Kaggle](https://www.kaggle.com/c/cassava-leaf-disease-classification).
+Data are 21,367 labeled images collected during a regular survey in Uganda. Most images were crowdsourced from farmers taking photos of their gardens, and annotated by experts at the National Crops Resources Research Institute (NaCRRI) in collaboration with the AI lab at Makerere University, Kampala. 
+
+The task of the competition is to classify each cassava image into four disease categories or a fifth category indicating a healthy leaf.
 
 # Organisation
 
@@ -23,3 +26,9 @@ of the cyclical learning rate are inside the notebook.
 ![Training](https://github.com/Cdk29/Cassava/blob/main/cassava_application_efficientnet_files/figure-gfm/unnamed-chunk-36-1.png)
 
 ![Learning_rate](https://github.com/Cdk29/Cassava/blob/main/cassava_application_efficientnet_files/figure-gfm/unnamed-chunk-30-2.png)
+
+## Fine tuning of the Efficientnet-B0
+
+In the notebook [cassava_file_tuning.md](https://github.com/Cdk29/Cassava/blob/main/cassava_file_tuning.md) I fine tuned the EfficientNet-B0, from (currently) the arbitrary layer of block5a_expand_conv. 
+
+![Fine_tuning](https://github.com/Cdk29/Cassava/blob/main/cassava_file_tuning_files/figure-gfm/unnamed-chunk-39-1.png)
