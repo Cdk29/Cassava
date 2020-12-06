@@ -6,7 +6,9 @@ Data are 21,367 labeled images collected during a regular survey in Uganda. Most
 
 The task of the competition is to classify each cassava image into four disease categories or a fifth category indicating a healthy leaf.
 
-# Organisation
+![Cassava](https://github.com/Cdk29/Cassava/blob/main/cassava.png)
+
+# Organisation of the repository
 
 ## Learning rate finder for the efficientnet with R
 
