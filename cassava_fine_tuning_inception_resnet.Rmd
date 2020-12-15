@@ -188,7 +188,7 @@ summary(model)
 
 ```{r}
 checkpoint_dir <- "checkpoints"
-model %>% load_model_weights_hdf5(file.path(checkpoint_dir, "fine_tuned_resnetv2.08.hdf5"))
+model %>% load_model_weights_hdf5("checkpoints/fine_tuned_resnetv2.07.hdf5")
 ```
 
 ```{r}
@@ -198,7 +198,8 @@ model %>% load_model_weights_hdf5(file.path(checkpoint_dir, "fine_tuned_resnetv2
 
 
 ```{r}
-unfreeze_weights(conv_base, from ="block17_8")
+#first at 26 x 26 
+unfreeze_weights(conv_base, from ="conv2d_275")
 ```
 
 
@@ -281,8 +282,8 @@ Cyclic_LR <- function(iteration=1:32000, base_lr=1e-5, max_lr=1e-3, step_size=20
 ```
 
 ```{r}
-n=200
-nb_epochs=20
+n=400
+nb_epochs=12
 #n_iter<-n*nb_epochs
 ```
 
@@ -355,7 +356,7 @@ history <- model %>% fit_generator(
 )
 ```
 
-```{r}
+```{r history_restnet_inception}
 plot(history)
 ```
 

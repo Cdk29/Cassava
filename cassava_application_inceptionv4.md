@@ -1,10 +1,7 @@
-Efficient Net Application, fine tuning
+Inception v4 or v5
 ================
 
-# Fine tuning efficientnet with R
-
-In this notebook we fine tune the model developed in the notebook
-cassava\_application\_efficientnet.Rmd.
+# Inception v4 or v5
 
 ``` r
 library(tidyverse)
@@ -241,7 +238,7 @@ for (i in 1:4) {
 }
 ```
 
-![](cassava_fine_tuning-_inception_restnet_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](cassava_application_inceptionv4_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 par(op)
@@ -255,7 +252,7 @@ train_generator <- flow_images_from_dataframe(dataframe = train_labels,
                                               x_col = "image_id",
                                               y_col = c("CBB","CBSD", "CGM", "CMD", "Healthy"),
                                               target_size = c(448, 448),
-                                              batch_size=8)
+                                              batch_size=16)
 
 validation_generator <- flow_images_from_dataframe(dataframe = val_labels, 
                                               directory = image_path,
@@ -263,7 +260,7 @@ validation_generator <- flow_images_from_dataframe(dataframe = val_labels,
                                               x_col = "image_id",
                                               y_col = c("CBB","CBSD", "CGM", "CMD", "Healthy"),
                                               target_size = c(448, 448),
-                                              batch_size=8)
+                                              batch_size=16)
 ```
 
 ``` r
@@ -311,19 +308,6 @@ summary(model)
     ## Trainable params: 10,757
     ## Non-trainable params: 54,339,808
     ## ________________________________________________________________________________
-
-``` r
-checkpoint_dir <- "checkpoints"
-model %>% load_model_weights_hdf5(file.path(checkpoint_dir, "fine_tuned_resnetv2.08.hdf5"))
-```
-
-``` r
-#summary(conv_base)
-```
-
-``` r
-unfreeze_weights(conv_base, from ="block17_8")
-```
 
 ``` r
 callback_lr_init <- function(logs){
@@ -405,7 +389,7 @@ Cyclic_LR <- function(iteration=1:32000, base_lr=1e-5, max_lr=1e-3, step_size=20
 
 ``` r
 n=200
-nb_epochs=20
+nb_epochs=10
 #n_iter<-n*nb_epochs
 ```
 
@@ -426,10 +410,10 @@ l_rate_div<-1.1*(1.2^i) #formula from the blog article of fastai.
 plot(l_rate_div, type="b", pch=16, cex=0.1, xlab="iteration", ylab="learning rate dividor")
 ```
 
-![](cassava_fine_tuning-_inception_restnet_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](cassava_application_inceptionv4_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 ``` r
-l_rate_cyclical <- Cyclic_LR(iteration=1:n, base_lr=1e-7, max_lr=(1e-3/5), step_size=floor(n/2),
+l_rate_cyclical <- Cyclic_LR(iteration=1:n, base_lr=1e-7, max_lr=1e-3, step_size=floor(n/2),
                         mode='triangular', gamma=1, scale_fn=NULL, scale_mode='cycle')
 
 start_tail <-length(l_rate_cyclical)-tail
@@ -446,13 +430,13 @@ l_rate <- rep(l_rate_cyclical, nb_epochs)
 plot(l_rate_cyclical, type="b", pch=16, xlab="iteration", cex=0.2, ylab="learning rate", col="grey50")
 ```
 
-![](cassava_fine_tuning-_inception_restnet_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](cassava_application_inceptionv4_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
 plot(l_rate, type="b", pch=16, xlab="iteration", cex=0.2, ylab="learning rate", col="grey50")
 ```
 
-![](cassava_fine_tuning-_inception_restnet_files/figure-gfm/unnamed-chunk-33-2.png)<!-- -->
+![](cassava_application_inceptionv4_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
 
 ``` r
 model %>% compile(
@@ -466,13 +450,11 @@ The following code came from the tutorial of Keras
 “tutorial\_save\_and\_restore”.
 
 ``` r
-checkpoint_dir <- "checkpoints_fine_tune"
+checkpoint_dir <- "checkpoints"
 unlink(checkpoint_dir, recursive = TRUE)
 dir.create(checkpoint_dir)
-filepath <- file.path(checkpoint_dir, "inception_resnet.{epoch:02d}.hdf5")
-```
+filepath <- file.path(checkpoint_dir, "fine_tuned_resnetv2.{epoch:02d}.hdf5")
 
-``` r
 check_point_callback <- callback_model_checkpoint(
   filepath = filepath,
   save_weights_only = TRUE,
@@ -501,4 +483,4 @@ plot(history)
 
     ## `geom_smooth()` using formula 'y ~ x'
 
-![](cassava_fine_tuning-_inception_restnet_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](cassava_application_inceptionv4_files/figure-gfm/history_inceptionv4-1.png)<!-- -->
