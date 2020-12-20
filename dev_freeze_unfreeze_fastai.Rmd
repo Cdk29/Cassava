@@ -1,14 +1,11 @@
 ---
 title: "Lr finder dev notebook"
-output: html_document
----
----
-title: "An R Markdown document converted from trying-resnext-with-r-and-fastai.ipynb from kaggle"
 output: github_document
 ---
 
+
 # Resnext with R
-Notebook to developp the graphical output for the learning rate finder of fastai.
+Notebook to writte the freeze and unfreeze function for the fastai wrapper.
 
 ```{r}
 # This R environment comes with many helpful analytics packages installed
@@ -22,12 +19,10 @@ library(tidyverse) # metapackage of all tidyverse packages
 
 list.files(path = "../input")
 
-# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
-# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
 ```
 
 ```{r}
-devtools::install_github("henry090/fastai",dependencies=FALSE)
+#devtools::install_github("henry090/fastai",dependencies=FALSE)
 #fastai::install_fastai(gpu = TRUE)
 ```
 
@@ -53,12 +48,11 @@ path_img = 'cassava-leaf-disease-classification/train_images/'
 
 ```{r}
 labels<-read_csv('cassava-leaf-disease-classification//train.csv')
-#labels = data.table::fread('/kaggle/input/cassava-leaf-disease-classification//train.csv')
 head(labels)
 ```
 
 ```{r}
-dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=8, seed=6, device = 'cuda', num_workers=0, item_tfms = RandomResizedCrop(224, min_scale=0.75))
+dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=64, seed=6, device = 'cuda', num_workers=0, item_tfms = RandomResizedCrop(224, min_scale=0.75))
 ```
 
 num_workers=0 is mandatory to not have the error "RuntimeError: DataLoader worker (pid(s) 482) exited unexpectedly".
@@ -70,7 +64,7 @@ dataloader %>% show_batch()
 If I had to bet, it is something related to kaggle/R environnement asking to define paremeters, as it works well in [the tutorial](https://henry090.github.io/fastai/articles/basic_img_class.html).
 
 ```{r}
-learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="fastai_model/") #prettier
+learnR <- dataloader %>% cnn_learner(xresnet18(), metrics = accuracy,  model_dir="fastai_model/") #prettier
 ```
 
 ```{r}
@@ -78,35 +72,51 @@ learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir
 #Error in freeze(.): could not find function "freeze"
 ```
 
+### Control of the manipulation
+
 ```{r}
 learnR$freeze()
-```
-
-Looking at the outputs of the kernel it does not seems to works (edit version 19 : actually it works).
-
-```{r}
-learnR %>% save(file="learnR")
+learnR$summary()
 ```
 
 ```{r}
-#learnR$export() 
-#"[Errno 30] Read-only file system: '../input/cassava-leaf-disease-classification/train_images/export.pkl" aahhh it brings back memories.
+learnR$unfreeze()
+learnR$summary()
 ```
+
+### New functions
+
+```{r}
+learnR %>% freeze()
+
+learnR$summary()
+```
+
 
 At the moment xresnet50() create out of memory errors.
 
 ```{r}
 learnR %>% lr_find()
-```
-
-```{r}
-#learnR$recorder$lrs
-#learnR$recorder$losses
-```
-
-
-```{r}
 learnR %>% plot_lr_find(dpi = 200)
 ```
 
-Thanks for the plot.
+
+```{r}
+learnR %>% fit_one_cycle(n_epoch = 6) 
+```
+
+
+```{r}
+learnR %>% unfreeze()
+```
+
+```{r}
+learnR$summary()
+```
+
+```{r}
+learnR %>% lr_find()
+learnR %>% plot_lr_find(dpi = 200)
+```
+
+
