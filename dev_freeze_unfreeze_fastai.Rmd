@@ -102,7 +102,7 @@ learnR %>% plot_lr_find(dpi = 200)
 
 
 ```{r}
-learnR %>% fit_one_cycle(n_epoch = 6) 
+learnR %>% fit_one_cycle(n_epoch = 1) 
 ```
 
 

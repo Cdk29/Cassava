@@ -64,8 +64,19 @@ list.files(path = "../input")
 devtools::install_github("henry090/fastai",dependencies=FALSE)
 ```
 
-    ## Skipping install of 'fastai' from a github remote, the SHA1 (bec294df) has not changed since last install.
-    ##   Use `force = TRUE` to force installation
+    ## Downloading GitHub repo henry090/fastai@HEAD
+
+    ##      checking for file ‘/tmp/RtmpFaHVBm/remotes129b363ba4b6/henry090-fastai-a34f08c/DESCRIPTION’ ...  ✓  checking for file ‘/tmp/RtmpFaHVBm/remotes129b363ba4b6/henry090-fastai-a34f08c/DESCRIPTION’
+    ##   ─  preparing ‘fastai’:
+    ##    checking DESCRIPTION meta-information ...  ✓  checking DESCRIPTION meta-information
+    ##   ─  checking for LF line-endings in source and make files and shell scripts (363ms)
+    ##   ─  checking for empty or unneeded directories
+    ##   ─  building ‘fastai_2.0.3.tar.gz’
+    ##      
+    ## 
+
+    ## Installing package into '/home/erolland/R/x86_64-pc-linux-gnu-library/4.0'
+    ## (as 'lib' is unspecified)
 
 ``` r
 #fastai::install_fastai(gpu = TRUE)
@@ -117,7 +128,9 @@ library(fastai)
     ## 
     ##     plot, Recall
 
-## Data loader
+## With cutout
+
+### Data loader
 
 I am using this two ressources : [the documentation of
 fastai](https://docs.fast.ai/vision.data.html#ImageDataLoaders.from_df)
@@ -160,17 +173,36 @@ head(labels)
 ``` r
 dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=16, seed=6, 
                                                item_tfms = Resize(448),
-                                               batch_tfms = aug_transforms(size=224, min_scale=0.75))
+                                               batch_tfms = list(aug_transforms(size=224, min_scale=0.75),
+                                                                 RandomErasing(p=1, sh=0.1, max_count = 4)))
 ```
 
 num\_workers=0 is mandatory to not have the error “RuntimeError:
 DataLoader worker (pid(s) 482) exited unexpectedly”.
 
 ``` r
-dataloader %>% show_batch()
+dataloader %>% show_batch(dpi = 200, figsize = c(6,6))
 ```
 
 ![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+``` r
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="fastai_model/") #prettier
@@ -576,41 +608,47 @@ learnR$freeze()
 learnR %>% lr_find()
 ```
 
-    ## SuggestedLRs(lr_min=0.005754399299621582, lr_steep=0.010964781977236271)
+    ## SuggestedLRs(lr_min=0.004786301031708717, lr_steep=1.0964781722577754e-06)
 
 ``` r
 learnR %>% plot_lr_find(dpi = 200)
 ```
 
-![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 #learnR %>% fit_one_cycle(n_epoch = 10) #works
-learnR %>% fine_tune(epochs = 6, freeze_epochs = 6)
+learnR %>% fine_tune(epochs = 12, freeze_epochs = 6)
 ```
 
     ## epoch   train_loss   valid_loss   accuracy   time 
     ## ------  -----------  -----------  ---------  -----
-    ## 0       1.226000     0.858580     0.689647   02:22 
-    ## 1       1.036769     0.808227     0.716990   02:21 
-    ## 2       0.911804     0.798233     0.705305   02:22 
-    ## 3       0.879829     0.781945     0.719561   02:21 
-    ## 4       0.850263     0.905430     0.644543   02:21 
-    ## 5       0.768594     0.728273     0.738023   02:21 
-    ## epoch   train_loss   valid_loss   accuracy   time  
-    ## ------  -----------  -----------  ---------  ------
-    ## 0       0.693360     0.643178     0.764898   03:08 
-    ## 1       0.721529     0.641361     0.769105   03:10 
-    ## 2       0.610440     0.591154     0.783828   03:09 
-    ## 3       0.607874     0.533866     0.803692   03:10 
-    ## 4       0.561613     0.512297     0.810937   03:09 
-    ## 5       0.528009     0.494652     0.820051   03:10
+    ## 0       1.267177     1.006710     0.692685   02:22 
+    ## 1       1.051077     1.717022     0.338864   02:22 
+    ## 2       0.898813     0.940673     0.661136   02:22 
+    ## 3       0.879759     1.389879     0.497079   02:23 
+    ## 4       0.853093     1.004859     0.602711   02:21 
+    ## 5       0.774511     0.735085     0.728909   02:21 
+    ## epoch   train_loss   valid_loss   accuracy   time 
+    ## ------  -----------  -----------  ---------  -----
+    ## 0       0.787038     0.689655     0.759056   03:10 
+    ## 1       0.735852     0.654570     0.759290   03:09 
+    ## 2       0.746706     0.696907     0.750643   03:09 
+    ## 3       0.700639     0.656992     0.774714   03:09 
+    ## 4       0.611353     0.821147     0.740360   03:09 
+    ## 5       0.600189     0.677382     0.764197   03:09 
+    ## 6       0.617070     0.619823     0.784763   03:10 
+    ## 7       0.522713     0.586591     0.803692   03:09 
+    ## 8       0.504254     0.549258     0.817948   03:09 
+    ## 9       0.541626     0.574327     0.810937   03:09 
+    ## 10      0.515474     0.593368     0.804861   03:10 
+    ## 11      0.474421     0.575263     0.807899   03:10
 
 ``` r
 learnR %>% plot_loss(dpi = 200)
 ```
 
-![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ``` r
 interp <- ClassificationInterpretation_from_learner(learnR)
@@ -619,6 +657,487 @@ interp %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
 ```
 
 ![](trying-resnext-with-r-and-fastai_files/figure-gfm/interpretation-1.png)<!-- -->
+
+## Without cutout
+
+``` r
+dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=16, seed=6, 
+                                               item_tfms = Resize(448),
+                                               batch_tfms = aug_transforms(size=224, min_scale=0.75))
+```
+
+num\_workers=0 is mandatory to not have the error “RuntimeError:
+DataLoader worker (pid(s) 482) exited unexpectedly”.
+
+``` r
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+``` r
+learnR2 <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="fastai_model/") #prettier
+```
+
+To save computation power :
+
+``` r
+learnR2$to_fp16()
+```
+
+    ## Sequential(
+    ##   (0): Sequential(
+    ##     (0): ConvLayer(
+    ##       (0): Conv2d(3, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    ##       (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##       (2): ReLU()
+    ##     )
+    ##     (1): ConvLayer(
+    ##       (0): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##       (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##       (2): ReLU()
+    ##     )
+    ##     (2): ConvLayer(
+    ##       (0): Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##       (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##       (2): ReLU()
+    ##     )
+    ##     (3): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+    ##     (4): Sequential(
+    ##       (0): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(64, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (1): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (2): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(256, 64, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(64, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##     )
+    ##     (5): Sequential(
+    ##       (0): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(256, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential(
+    ##           (0): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (1): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (2): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (3): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(128, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##     )
+    ##     (6): Sequential(
+    ##       (0): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(512, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential(
+    ##           (0): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(512, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (1): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (2): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (3): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (4): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (5): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(256, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##     )
+    ##     (7): Sequential(
+    ##       (0): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(1024, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(512, 2048, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential(
+    ##           (0): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(1024, 2048, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (1): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(2048, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(512, 2048, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##       (2): ResBlock(
+    ##         (convpath): Sequential(
+    ##           (0): ConvLayer(
+    ##             (0): Conv2d(2048, 512, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (1): ConvLayer(
+    ##             (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##             (2): ReLU()
+    ##           )
+    ##           (2): ConvLayer(
+    ##             (0): Conv2d(512, 2048, kernel_size=(1, 1), stride=(1, 1), bias=False)
+    ##             (1): BatchNorm2d(2048, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##           )
+    ##         )
+    ##         (idpath): Sequential()
+    ##         (act): ReLU(inplace=True)
+    ##       )
+    ##     )
+    ##   )
+    ##   (1): Sequential(
+    ##     (0): AdaptiveConcatPool2d(
+    ##       (ap): AdaptiveAvgPool2d(output_size=1)
+    ##       (mp): AdaptiveMaxPool2d(output_size=1)
+    ##     )
+    ##     (1): Flatten(full=False)
+    ##     (2): BatchNorm1d(4096, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##     (3): Dropout(p=0.25, inplace=False)
+    ##     (4): Linear(in_features=4096, out_features=512, bias=False)
+    ##     (5): ReLU(inplace=True)
+    ##     (6): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    ##     (7): Dropout(p=0.5, inplace=False)
+    ##     (8): Linear(in_features=512, out_features=5, bias=False)
+    ##   )
+    ## )
+
+``` r
+learnR2$freeze()
+```
+
+``` r
+#learnR %>% fit_one_cycle(n_epoch = 10) #works
+learnR2 %>% fine_tune(epochs = 12, freeze_epochs = 6)
+```
+
+    ## epoch   train_loss   valid_loss   accuracy   time  
+    ## ------  -----------  -----------  ---------  ------
+    ## 0       1.227866     0.939970     0.670951   02:22 
+    ## 1       0.994696     0.815046     0.714186   02:22 
+    ## 2       0.842036     0.805572     0.702734   02:21 
+    ## 3       0.859800     0.879434     0.672353   02:22 
+    ## 4       0.878630     0.754587     0.723300   02:22 
+    ## 5       0.801866     0.710940     0.739425   02:22 
+    ## epoch   train_loss   valid_loss   accuracy   time  
+    ## ------  -----------  -----------  ---------  ------
+    ## 0       0.755464     0.643284     0.762795   03:10 
+    ## 1       0.713462     0.664470     0.762561   03:10 
+    ## 2       0.733198     0.595979     0.788502   03:10 
+    ## 3       0.624302     0.638739     0.760925   03:10 
+    ## 4       0.613476     0.649091     0.754849   03:09 
+    ## 5       0.581640     0.538600     0.802057   03:11 
+    ## 6       0.521709     0.509059     0.816312   03:10 
+    ## 7       0.529464     0.493440     0.825894   03:10 
+    ## 8       0.461125     0.466890     0.833606   03:11 
+    ## 9       0.398920     0.456957     0.836878   03:10 
+    ## 10      0.435578     0.456556     0.834073   03:11 
+    ## 11      0.492745     0.448490     0.837813   03:10
+
+``` r
+learnR2 %>% plot_loss(dpi = 200)
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+Comparison with learnR :
+
+``` r
+learnR %>% plot_loss(dpi = 200)
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+
+``` r
+interp2 <- ClassificationInterpretation_from_learner(learnR2)
+
+interp2 %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+
+Comparison with learnR :
+
+``` r
+interp %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
+```
+
+![](trying-resnext-with-r-and-fastai_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
 sessionInfo()

@@ -327,7 +327,7 @@ learnR$summary()
     ## Total trainable params: 539,648
     ## Total non-trainable params: 11,186,016
     ## 
-    ## Optimizer used: <function Adam at 0x7ffa1b2a3378>
+    ## Optimizer used: <function Adam at 0x7fa1bd227378>
     ## Loss function: FlattenedLoss of CrossEntropyLoss()
     ## 
     ## Model frozen up to parameter group #2
@@ -518,7 +518,7 @@ learnR$summary()
     ## Total trainable params: 11,725,664
     ## Total non-trainable params: 0
     ## 
-    ## Optimizer used: <function Adam at 0x7ffa1b2a3378>
+    ## Optimizer used: <function Adam at 0x7fa1bd227378>
     ## Loss function: FlattenedLoss of CrossEntropyLoss()
     ## 
     ## Model unfrozen
@@ -534,7 +534,7 @@ learnR$summary()
 learnR %>% freeze()
 ```
 
-    ## The model has been freezed
+    ## The model has been frozen
 
 ``` r
 learnR$summary()
@@ -716,7 +716,7 @@ learnR$summary()
     ## Total trainable params: 539,648
     ## Total non-trainable params: 11,186,016
     ## 
-    ## Optimizer used: <function Adam at 0x7ffa1b2a3378>
+    ## Optimizer used: <function Adam at 0x7fa1bd227378>
     ## Loss function: FlattenedLoss of CrossEntropyLoss()
     ## 
     ## Model frozen up to parameter group #2
@@ -732,7 +732,7 @@ At the moment xresnet50() create out of memory errors.
 learnR %>% lr_find()
 ```
 
-    ## SuggestedLRs(lr_min=0.010000000149011612, lr_steep=1.0964781722577754e-06)
+    ## SuggestedLRs(lr_min=0.006918309628963471, lr_steep=0.0010000000474974513)
 
 ``` r
 learnR %>% plot_lr_find(dpi = 200)
@@ -741,30 +741,25 @@ learnR %>% plot_lr_find(dpi = 200)
 ![](dev_freeze_unfreeze_fastai_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
-learnR %>% fit_one_cycle(n_epoch = 6) 
+learnR %>% fit_one_cycle(n_epoch = 1) 
 ```
 
-    ## epoch   train_loss   valid_loss   accuracy   time  
-    ## ------  -----------  -----------  ---------  ------
-    ## 0       1.483974     0.990085     0.662071   03:32 
-    ## 1       1.009283     0.801411     0.712082   03:31 
-    ## 2       0.874470     0.738513     0.726805   03:33 
-    ## 3       0.788658     0.700214     0.735219   03:31 
-    ## 4       0.756062     0.678886     0.744567   03:31 
-    ## 5       0.728166     0.676004     0.745501   03:30
+    ## epoch   train_loss   valid_loss   accuracy   time 
+    ## ------  -----------  -----------  ---------  -----
+    ## 0       1.143034     0.824889     0.706707   03:24
 
 ``` r
 learnR %>% unfreeze()
 ```
 
-    ## The model has been unfreezed
+    ## The model has been unfrozen
 
 ``` r
 learnR$summary()
 ```
 
-    ## epoch   train_loss   valid_loss   accuracy   time 
-    ## ------  -----------  -----------  ---------  -----
+    ## epoch   train_loss   valid_loss   accuracy   time  
+    ## ------  -----------  -----------  ---------  ------
 
     ## Sequential (Input shape: ['64 x 3 x 224 x 224'])
     ## ================================================================
@@ -939,7 +934,7 @@ learnR$summary()
     ## Total trainable params: 11,725,664
     ## Total non-trainable params: 0
     ## 
-    ## Optimizer used: <function Adam at 0x7ffa1b2a3378>
+    ## Optimizer used: <function Adam at 0x7fa1bd227378>
     ## Loss function: FlattenedLoss of CrossEntropyLoss()
     ## 
     ## Model unfrozen
@@ -953,7 +948,7 @@ learnR$summary()
 learnR %>% lr_find()
 ```
 
-    ## SuggestedLRs(lr_min=1.0964781722577755e-07, lr_steep=9.12010818865383e-07)
+    ## SuggestedLRs(lr_min=0.0001737800776027143, lr_steep=1.737800812406931e-05)
 
 ``` r
 learnR %>% plot_lr_find(dpi = 200)

@@ -41,7 +41,9 @@ devtools::install_github("Rstudio/reticulate")
 library(fastai)
 ```
 
-## Data loader
+## With cutout
+
+### Data loader
 
 I am using this two ressources : [the documentation of fastai](https://docs.fast.ai/vision.data.html#ImageDataLoaders.from_df) and the [tutorial of the wrapper](https://henry090.github.io/fastai/articles/basic_img_class.html).
 
@@ -61,15 +63,27 @@ head(labels)
 ```{r}
 dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=16, seed=6, 
                                                item_tfms = Resize(448),
-                                               batch_tfms = aug_transforms(size=224, min_scale=0.75))
+                                               batch_tfms = list(aug_transforms(size=224, min_scale=0.75),
+                                                                 RandomErasing(p=1, sh=0.1, max_count = 4)))
 ```
 
 num_workers=0 is mandatory to not have the error "RuntimeError: DataLoader worker (pid(s) 482) exited unexpectedly".
 
 ```{r}
-dataloader %>% show_batch()
+dataloader %>% show_batch(dpi = 200, figsize = c(6,6))
 ```
 
+```{r}
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+```{r}
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+```{r}
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
 
 ```{r}
 learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="fastai_model/") #prettier
@@ -77,7 +91,7 @@ learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir
 
 To save computation power :
 
-```{r}
+```{r message=TRUE}
 learnR$to_fp16()
 ```
 
@@ -99,7 +113,7 @@ learnR %>% plot_lr_find(dpi = 200)
 
 ```{r}
 #learnR %>% fit_one_cycle(n_epoch = 10) #works
-learnR %>% fine_tune(epochs = 6, freeze_epochs = 6)
+learnR %>% fine_tune(epochs = 12, freeze_epochs = 6)
 ```
 
 ```{r}
@@ -112,6 +126,68 @@ interp <- ClassificationInterpretation_from_learner(learnR)
 
 interp %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
 ```
+
+## Without cutout
+
+
+```{r}
+dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=16, seed=6, 
+                                               item_tfms = Resize(448),
+                                               batch_tfms = aug_transforms(size=224, min_scale=0.75))
+```
+
+num_workers=0 is mandatory to not have the error "RuntimeError: DataLoader worker (pid(s) 482) exited unexpectedly".
+
+```{r}
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+```{r}
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+```{r}
+learnR2 <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="fastai_model/") #prettier
+```
+
+To save computation power :
+
+```{r message=TRUE}
+learnR2$to_fp16()
+```
+
+
+```{r}
+learnR2$freeze()
+```
+
+```{r}
+#learnR %>% fit_one_cycle(n_epoch = 10) #works
+learnR2 %>% fine_tune(epochs = 12, freeze_epochs = 6)
+```
+
+```{r}
+learnR2 %>% plot_loss(dpi = 200)
+```
+
+Comparison with learnR :
+
+```{r}
+learnR %>% plot_loss(dpi = 200)
+```
+
+```{r}
+interp2 <- ClassificationInterpretation_from_learner(learnR2)
+
+interp2 %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
+```
+
+Comparison with learnR :
+
+```{r}
+interp %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
+```
+
 
 ```{r}
 sessionInfo()
