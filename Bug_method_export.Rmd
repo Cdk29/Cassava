@@ -103,7 +103,7 @@ interp %>% plot_top_losses(k=12, dpi = 300, figsize = c(8, 5))
 ```
 
 ```{r}
-learnR$export(fname = "Xresnet_files/")
+learnR$export(fname = "export.pkl")
 ```
 
 ```{r}
