@@ -1,0 +1,113 @@
+---
+title: "Bug export"
+output: github_document
+---
+
+
+# Resnext with R
+
+```{r}
+# This R environment comes with many helpful analytics packages installed
+# It is defined by the kaggle/rstats Docker image: https://github.com/kaggle/docker-rstats
+# For example, here's a helpful package to load
+
+library(tidyverse) # metapackage of all tidyverse packages
+
+# Input data files are available in the read-only "../input/" directory
+# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+
+list.files(path = "../input")
+
+# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
+# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+```
+
+```{r}
+#devtools::install_github("henry090/fastai",dependencies=FALSE)
+#fastai::install_fastai(gpu = TRUE)
+```
+
+```{r}
+#devtools::install_github("Rstudio/reticulate")
+#fastai::install_fastai(gpu = TRUE)
+```
+
+```{r}
+library(fastai)
+```
+
+
+### Data loader
+
+I am using this two ressources : [the documentation of fastai](https://docs.fast.ai/vision.data.html#ImageDataLoaders.from_df) and the [tutorial of the wrapper](https://henry090.github.io/fastai/articles/basic_img_class.html).
+
+```{r}
+path_img = 'cassava-leaf-disease-classification/train_images/'
+```
+
+```{r}
+#library(data.table)
+```
+
+```{r}
+labels<-read_csv('cassava-leaf-disease-classification//train.csv')
+head(labels)
+```
+
+```{r}
+dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=32, seed=6, 
+                                               item_tfms = Resize(448),
+                                               batch_tfms = aug_transforms(size=224, min_scale=0.75))
+```
+
+
+```{r}
+dataloader %>% show_batch(dpi = 200, figsize = c(6,6))
+```
+
+```{r}
+dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
+```
+
+```{r}
+learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="Xresnet_files/") #prettier
+```
+
+To save computation power :
+
+```{r message=TRUE}
+learnR$to_fp16()
+```
+
+
+```{r}
+learnR %>% freeze()
+```
+
+```{r}
+learnR %>% fine_tune(epochs = 1, freeze_epochs = 1)
+```
+
+```{r}
+learnR %>% plot_loss(dpi = 200)
+```
+
+```{r interpretation}
+interp <- ClassificationInterpretation_from_learner(learnR)
+
+interp %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
+```
+
+```{r}
+interp %>% plot_top_losses(k=12, dpi = 300, figsize = c(8, 5))
+```
+
+```{r}
+learnR$export(fname = "Xresnet_files/")
+```
+
+```{r}
+sessionInfo()
+```
+
+

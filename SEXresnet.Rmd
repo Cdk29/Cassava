@@ -1,10 +1,10 @@
 ---
-title: "XSE_resnext"
+title: "SEXresnet"
 output: github_document
 ---
 
 
-# Seresnext with R
+# XSeresnet with R
 
 ```{r}
 # This R environment comes with many helpful analytics packages installed
@@ -55,7 +55,7 @@ head(labels)
 ```
 
 ```{r}
-dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=8, seed=6, 
+dataloader <- fastai::ImageDataLoaders_from_df(df=labels, path=path_img, bs=4, seed=6, 
                                                item_tfms = Resize(448),
                                                batch_tfms = aug_transforms(size=224, min_scale=0.75))
 ```
@@ -70,7 +70,7 @@ dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
 ```
 
 ```{r}
-learnR <- dataloader %>% cnn_learner(xse_resnext50(), metrics = accuracy,  model_dir="fastai_model/") #prettier
+learnR <- dataloader %>% cnn_learner(fastai::xse_resnet50(), metrics = accuracy,  model_dir="XSEresnet_files/") #prettier
 ```
 
 To save computation power :
@@ -85,23 +85,7 @@ learnR %>% freeze()
 ```
 
 ```{r}
-# learnR %>% lr_find()
-```
-
-
-```{r}
-# learnR %>% plot_lr_find(dpi = 200)
-```
-
-
-```{r}
-#learnR %>% fit_one_cycle(n_epoch = 1) #works
 learnR %>% fine_tune(epochs = 1, freeze_epochs = 1)
-```
-
-```{r}
-# learnR %>% unfreeze()
-# learnR %>% fit_one_cycle(n_epoch = 1) #works
 ```
 
 ```{r}
@@ -114,6 +98,9 @@ interp <- ClassificationInterpretation_from_learner(learnR)
 interp %>% plot_confusion_matrix(dpi = 200, figsize = c(6,6))
 ```
 
+```{r}
+interp %>% plot_top_losses(k=12, dpi = 300, figsize = c(8, 5))
+```
 
 ```{r}
 sessionInfo()
