@@ -70,7 +70,7 @@ dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
 ```
 
 ```{r}
-learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="Xresnet_files/") #prettier
+learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy(),  model_dir="Xresnet_files/") #prettier
 ```
 
 To save computation power :
