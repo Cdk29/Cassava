@@ -1,7 +1,7 @@
-Xresnet
+Bug export
 ================
 
-# Resnext with R
+# Xresnet with R
 
 ``` r
 # This R environment comes with many helpful analytics packages installed
@@ -37,7 +37,24 @@ list.files(path = "../input")
 ```
 
 ``` r
-#devtools::install_github("henry090/fastai",dependencies=FALSE)
+devtools::install_github("henry090/fastai",dependencies=FALSE)
+```
+
+    ## Downloading GitHub repo henry090/fastai@HEAD
+
+    ##      checking for file ‘/tmp/RtmpdO4umF/remotesca1f0d394c/henry090-fastai-92744cf/DESCRIPTION’ ...  ✓  checking for file ‘/tmp/RtmpdO4umF/remotesca1f0d394c/henry090-fastai-92744cf/DESCRIPTION’
+    ##   ─  preparing ‘fastai’:
+    ##    checking DESCRIPTION meta-information ...  ✓  checking DESCRIPTION meta-information
+    ##   ─  checking for LF line-endings in source and make files and shell scripts (421ms)
+    ##   ─  checking for empty or unneeded directories
+    ##   ─  building ‘fastai_2.0.4.tar.gz’
+    ##      
+    ## 
+
+    ## Installing package into '/home/erolland/R/x86_64-pc-linux-gnu-library/4.0'
+    ## (as 'lib' is unspecified)
+
+``` r
 #fastai::install_fastai(gpu = TRUE)
 ```
 
@@ -140,7 +157,7 @@ dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
 ![](Xresnet_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
-learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="Xresnet_files/") #prettier
+learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy(),  model_dir="Xresnet_files/") #prettier
 ```
 
 To save computation power :
@@ -542,29 +559,37 @@ learnR %>% freeze()
     ## The model has been frozen
 
 ``` r
-learnR %>% fine_tune(epochs = 8, freeze_epochs = 8)
+learnR %>% fine_tune(epochs = 16, freeze_epochs = 8)
 ```
 
     ## epoch   train_loss   valid_loss   accuracy   time  
     ## ------  -----------  -----------  ---------  ------
-    ## 0       1.409996     1.005049     0.660902   01:54 
-    ## 1       1.064344     0.899811     0.678430   01:52 
-    ## 2       0.980241     0.854144     0.707876   01:52 
-    ## 3       0.892769     0.791412     0.706473   01:52 
-    ## 4       0.811332     0.763333     0.725169   01:52 
-    ## 5       0.807027     0.745718     0.720729   01:52 
-    ## 6       0.787391     0.732611     0.735219   01:51 
-    ## 7       0.738135     0.704353     0.734284   01:52 
-    ## epoch   train_loss   valid_loss   accuracy   time 
-    ## ------  -----------  -----------  ---------  -----
-    ## 0       0.683343     0.646418     0.758355   02:26 
-    ## 1       0.645743     0.659142     0.755784   02:26 
-    ## 2       0.614892     0.610919     0.774714   02:25 
-    ## 3       0.615299     0.643139     0.754849   02:26 
-    ## 4       0.549116     0.537235     0.802758   02:25 
-    ## 5       0.519960     0.502753     0.816780   02:26 
-    ## 6       0.487669     0.515773     0.811171   02:25 
-    ## 7       0.456326     0.500059     0.818883   02:26
+    ## 0       1.361343     0.921373     0.683571   01:53 
+    ## 1       1.077713     0.777055     0.718860   01:52 
+    ## 2       0.939034     0.795102     0.702734   01:52 
+    ## 3       0.884913     0.756387     0.724001   01:51 
+    ## 4       0.807232     0.787357     0.721430   01:52 
+    ## 5       0.821122     0.735426     0.727974   01:52 
+    ## 6       0.774428     0.750282     0.723534   01:52 
+    ## 7       0.740688     0.714056     0.733816   01:52 
+    ## epoch   train_loss   valid_loss   accuracy   time  
+    ## ------  -----------  -----------  ---------  ------
+    ## 0       0.675909     0.647314     0.757654   02:27 
+    ## 1       0.636141     0.622894     0.768170   02:26 
+    ## 2       0.651093     0.609446     0.776350   02:25 
+    ## 3       0.627111     0.629186     0.771442   02:24 
+    ## 4       0.614805     0.588353     0.783594   02:24 
+    ## 5       0.563212     0.542893     0.810470   02:24 
+    ## 6       0.551608     0.566400     0.791540   02:24 
+    ## 7       0.552029     0.551869     0.799953   02:24 
+    ## 8       0.472795     0.511617     0.819350   02:24 
+    ## 9       0.499718     0.509312     0.816312   02:24 
+    ## 10      0.445133     0.517810     0.817481   02:24 
+    ## 11      0.442019     0.486418     0.820051   02:24 
+    ## 12      0.373508     0.462007     0.835709   02:25 
+    ## 13      0.416595     0.448604     0.841785   02:24 
+    ## 14      0.391346     0.456869     0.837345   02:24 
+    ## 15      0.396088     0.451169     0.839215   02:24
 
 ``` r
 learnR %>% plot_loss(dpi = 200)
@@ -587,7 +612,7 @@ interp %>% plot_top_losses(k=12, dpi = 300, figsize = c(8, 5))
 ![](Xresnet_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 ``` r
-#learnR$export(fname = "Xresnet_files/")
+learnR$export(fname = "xresnet_50.pkl")
 ```
 
 ``` r
@@ -614,31 +639,36 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ##  [1] fastai_2.0.3    forcats_0.5.0   stringr_1.4.0   dplyr_1.0.2    
+    ##  [1] fastai_2.0.4    forcats_0.5.0   stringr_1.4.0   dplyr_1.0.2    
     ##  [5] purrr_0.3.4     readr_1.4.0     tidyr_1.1.2     tibble_3.0.4   
     ##  [9] ggplot2_3.3.2   tidyverse_1.3.0
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] Rcpp_1.0.5           lubridate_1.7.9.2    lattice_0.20-41     
-    ##  [4] png_0.1-7            assertthat_0.2.1     digest_0.6.27       
-    ##  [7] utf8_1.1.4           R6_2.5.0             cellranger_1.1.0    
-    ## [10] backports_1.2.1      reprex_0.3.0         evaluate_0.14       
-    ## [13] httr_1.4.2           highr_0.8            pillar_1.4.7        
-    ## [16] rlang_0.4.9          curl_4.3             readxl_1.3.1        
-    ## [19] data.table_1.13.4    rstudioapi_0.13      car_3.0-10          
-    ## [22] Matrix_1.2-18        reticulate_1.18-9000 rmarkdown_2.5       
-    ## [25] foreign_0.8-80       munsell_0.5.0        broom_0.7.2         
-    ## [28] compiler_4.0.2       modelr_0.1.8         xfun_0.19           
-    ## [31] pkgconfig_2.0.3      htmltools_0.5.0      tidyselect_1.1.0    
-    ## [34] rio_0.5.16           fansi_0.4.1          crayon_1.3.4        
-    ## [37] dbplyr_2.0.0         withr_2.3.0          ggpubr_0.4.0        
-    ## [40] rappdirs_0.3.1       grid_4.0.2           jsonlite_1.7.2      
-    ## [43] gtable_0.3.0         lifecycle_0.2.0      DBI_1.1.0           
-    ## [46] magrittr_2.0.1       scales_1.1.1         zip_2.1.1           
-    ## [49] carData_3.0-4        cli_2.2.0            stringi_1.5.3       
-    ## [52] ggsignif_0.6.0       fs_1.5.0             xml2_1.3.2          
-    ## [55] ellipsis_0.3.1       generics_0.1.0       vctrs_0.3.5         
-    ## [58] openxlsx_4.2.3       tools_4.0.2          glue_1.4.2          
-    ## [61] hms_0.5.3            abind_1.4-5          yaml_2.2.1          
-    ## [64] colorspace_2.0-0     rstatix_0.6.0        rvest_0.3.6         
-    ## [67] knitr_1.30           haven_2.3.1
+    ##  [1] fs_1.5.0             usethis_2.0.0        lubridate_1.7.9.2   
+    ##  [4] devtools_2.3.2       httr_1.4.2           rprojroot_2.0.2     
+    ##  [7] tools_4.0.2          backports_1.2.1      utf8_1.1.4          
+    ## [10] R6_2.5.0             DBI_1.1.0            colorspace_2.0-0    
+    ## [13] withr_2.3.0          tidyselect_1.1.0     prettyunits_1.1.1   
+    ## [16] processx_3.4.5       curl_4.3             compiler_4.0.2      
+    ## [19] cli_2.2.0            rvest_0.3.6          xml2_1.3.2          
+    ## [22] desc_1.2.0           scales_1.1.1         callr_3.5.1         
+    ## [25] rappdirs_0.3.1       digest_0.6.27        foreign_0.8-80      
+    ## [28] rmarkdown_2.5        rio_0.5.16           pkgconfig_2.0.3     
+    ## [31] htmltools_0.5.0      sessioninfo_1.1.1    dbplyr_2.0.0        
+    ## [34] highr_0.8            rlang_0.4.9          readxl_1.3.1        
+    ## [37] rstudioapi_0.13      generics_0.1.0       jsonlite_1.7.2      
+    ## [40] zip_2.1.1            car_3.0-10           magrittr_2.0.1      
+    ## [43] Matrix_1.2-18        Rcpp_1.0.5           munsell_0.5.0       
+    ## [46] fansi_0.4.1          abind_1.4-5          reticulate_1.18-9000
+    ## [49] lifecycle_0.2.0      stringi_1.5.3        yaml_2.2.1          
+    ## [52] carData_3.0-4        pkgbuild_1.1.0       grid_4.0.2          
+    ## [55] crayon_1.3.4         lattice_0.20-41      haven_2.3.1         
+    ## [58] hms_0.5.3            knitr_1.30           ps_1.5.0            
+    ## [61] pillar_1.4.7         ggpubr_0.4.0         ggsignif_0.6.0      
+    ## [64] pkgload_1.1.0        reprex_0.3.0         glue_1.4.2          
+    ## [67] evaluate_0.14        data.table_1.13.4    remotes_2.2.0       
+    ## [70] modelr_0.1.8         vctrs_0.3.5          png_0.1-7           
+    ## [73] testthat_3.0.0       cellranger_1.1.0     gtable_0.3.0        
+    ## [76] assertthat_0.2.1     xfun_0.19            openxlsx_4.2.3      
+    ## [79] broom_0.7.2          rstatix_0.6.0        memoise_1.1.0       
+    ## [82] ellipsis_0.3.1

@@ -1,10 +1,10 @@
 ---
-title: "Xresnet"
+title: "Bug export"
 output: github_document
 ---
 
 
-# Resnext with R
+# Xresnet with R
 
 ```{r}
 # This R environment comes with many helpful analytics packages installed
@@ -70,7 +70,7 @@ dataloader %>% show_batch(dpi = 200, figsize = c(10, 10))
 ```
 
 ```{r}
-learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy,  model_dir="Xresnet_files/") #prettier
+learnR <- dataloader %>% cnn_learner(xresnet50(), metrics = accuracy(),  model_dir="Xresnet_files/") #prettier
 ```
 
 To save computation power :
@@ -85,7 +85,7 @@ learnR %>% freeze()
 ```
 
 ```{r}
-learnR %>% fine_tune(epochs = 8, freeze_epochs = 8)
+learnR %>% fine_tune(epochs = 16, freeze_epochs = 8)
 ```
 
 ```{r}
@@ -103,7 +103,7 @@ interp %>% plot_top_losses(k=12, dpi = 300, figsize = c(8, 5))
 ```
 
 ```{r}
-#learnR$export(fname = "Xresnet_files/")
+learnR$export(fname = "xresnet_50.pkl")
 ```
 
 ```{r}
