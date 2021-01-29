@@ -1,5 +1,6 @@
 # Cassava Cassava Leaf Disease Classification
 
+This repository is a bit out of date. Most of the things happen on my [kaggle profil](https://www.kaggle.com/cdk292).
 
 Repository for the [Cassava Leaf Disease Classification Competition on Kaggle](https://www.kaggle.com/c/cassava-leaf-disease-classification).
 Data are 21,367 labeled images collected during a regular survey in Uganda. Most images were crowdsourced from farmers taking photos of their gardens, and annotated by experts at the National Crops Resources Research Institute (NaCRRI) in collaboration with the AI lab at Makerere University, Kampala. 
